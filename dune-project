@@ -26,6 +26,5 @@
  (depends
   (ocaml (>= 3.12.1))
   (ocamlfind :build)
-  (stdcompat (>= 18))
   (conf-python-3-dev :with-test))
  (depopts utop))

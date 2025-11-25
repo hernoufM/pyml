@@ -35,7 +35,6 @@ ifneq ($(HAVE_OCAMLFIND),no)
 	OCAMLMKTOP := $(OCAMLFIND) ocamlmktop
 	OCAMLDEP := $(OCAMLFIND) ocamldep
 	OCAMLDOC := $(OCAMLFIND) ocamldoc
-	STDCOMPAT := $(shell $(OCAMLFIND) query stdcompat)
 else
 	OCAMLC := $(shell \
 		if ocamlc.opt -version >/dev/null 2>&1; then \
@@ -60,14 +59,13 @@ $(error There is no OCaml compiler available in path)
 	OCAMLMKTOP := ocamlmktop
 	OCAMLDEP := ocamldep
 	OCAMLDOC := ocamldoc
-	STDCOMPAT := .
 endif
 
 OCAMLVERSION := $(shell $(OCAMLC) -version)
 OCAMLVERSION_LIST := $(subst ., ,$(OCAMLVERSION))
 OCAMLVERSION_MAJOR := $(word 1,$(OCAMLVERSION_LIST))
 
-LIBRARIES := unix stdcompat
+LIBRARIES := unix
 
 ifeq ($(OCAMLVERSION_MAJOR),5)
 	LIBRARIES_NUMPY = $(LIBRARIES)
@@ -81,7 +79,6 @@ space := $(null) #
 comma := ,
 
 ifneq ($(HAVE_OCAMLFIND),no)
-        OCAMLCFLAGS += -package stdcompat
         OCAMLLDFLAGS += -linkpkg
 	PACKAGES := $(subst $(space),$(comma),$(LIBRARIES))
 	PACKAGES_NUMPY := $(subst $(space),$(comma),$(LIBRARIES_NUMPY))
@@ -90,16 +87,10 @@ ifneq ($(HAVE_OCAMLFIND),no)
 	OCAMLNATIVELIBS := -package $(PACKAGES)
 	OCAMLNATIVELIBSNUMPY := -package $(PACKAGES_NUMPY)
 else
-        OCAMLCFLAGS += -I $(STDCOMPAT)
-        OCAMLLDFLAGS += -I $(STDCOMPAT)
 	OCAMLBYTECODELIBS := $(LIBRARIES:=.cma)
 	OCAMLBYTECODELIBSNUMPY := $(LIBRARIES_NUMPY:=.cma)
 	OCAMLNATIVELIBS := $(LIBRARIES:=.cmxa)
 	OCAMLNATIVELIBSNUMPY := $(LIBRARIES_NUMPY:=.cmxa)
-endif
-
-ifeq ($(wildcard $(STDCOMPAT)/stdcompat.cma),)
-$(error stdcompat module not found: please specify the path with STDCOMPAT=...)
 endif
 
 OCAMLVERSION := $(shell $(OCAMLC) -version)
@@ -372,7 +363,7 @@ endif
 #	ocamlmktop raises "Warning 31". See https://github.com/diml/utop/issues/212
 #	$(OCAMLMKTOP) -o $@ -thread -linkpkg -package utop -dontlink compiler-libs $^
 	ocamlfind ocamlc -thread -linkpkg -linkall -predicates create_toploop \
-		-package compiler-libs.toplevel,utop,stdcompat $^ -o $@
+		-package compiler-libs.toplevel,utop $^ -o $@
 
 pyops.ml: pyops.ml.new
 	cp $< $@

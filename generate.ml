@@ -1,4 +1,3 @@
-open Stdcompat
 
 type ty =
     PyObject of bool
